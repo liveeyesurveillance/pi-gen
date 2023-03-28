@@ -81,7 +81,7 @@ EOF
 
 # Install the custom package from Git
 on_chroot << EOF
-git clone https://nitish-liveeye:XXXXXXXXXXXXX@github.com/liveeyesurveillance/data-capture-server.git /home/nymea/
+git clone https://nitish-liveeye:XXXXXXXXXXXXX@github.com/liveeyesurveillance/data-capture-server.git /home/nymea/data-capture-server
 EOF
 
 # Install dependencies for the custom package
