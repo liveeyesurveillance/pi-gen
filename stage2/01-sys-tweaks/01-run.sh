@@ -70,3 +70,37 @@ usermod --pass='*' root
 EOF
 
 rm -f "${ROOTFS_DIR}/etc/ssh/"ssh_host_*_key*
+
+# Install Node.js version 11.14.0
+on_chroot << EOF
+curl -o /home/nymea/node-v11.14.0-linux-armv6l.tar.gz https://nodejs.org/download/release/v11.14.0/node-v11.14.0-linux-armv6l.tar.gz -k
+tar -xzf /home/nymea/node-v11.14.0-linux-armv6l.tar.gz -C /home/nymea/
+sudo cp -r /home/nymea/node-v11.14.0-linux-armv6l/* /usr/local/
+EOF
+
+
+# Install the custom package from Git
+on_chroot << EOF
+git clone https://nitish-liveeye:e2616db072f3fc24294ae9475159645440e36c16@github.com/liveeyesurveillance/data-capture-server.git
+EOF
+
+# Install dependencies for the custom package
+on_chroot << EOF
+cd /home/nymea/data-capture-server
+npm install
+EOF
+
+# Copy the file to the system directory for it to run as a service
+on_chroot << EOF
+cp /home/nymea/data-capture-server/LiveEyeDataCapture.service ${ROOTFS_DIR}/etc/systemd/system
+sudo systemctl enable LiveEyeDataCapture.service
+EOF
+
+# Load the watchdog module
+on_chroot << EOF
+modprobe bcm2835_wdt
+echo "bcm2835_wdt" >> /etc/modules
+echo "watchdog-device = /dev/watchdog" >> /etc/watchdog.conf
+echo "watchdog-timeout = 60" >> /etc/watchdog.conf
+systemctl start watchdog
+EOF
