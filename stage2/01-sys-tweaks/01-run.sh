@@ -81,7 +81,7 @@ EOF
 
 # Install the custom package from Git
 on_chroot << EOF
-git clone https://nitish-liveeye:XXXXXXXXXXXXX@github.com/liveeyesurveillance/data-capture-server.git
+git clone https://nitish-liveeye:XXXXXXXXXXXXX@github.com/liveeyesurveillance/data-capture-server.git /home/nymea/
 EOF
 
 # Install dependencies for the custom package
@@ -92,7 +92,7 @@ EOF
 
 # Copy the file to the system directory for it to run as a service
 on_chroot << EOF
-cp /home/nymea/data-capture-server/LiveEyeDataCapture.service ${ROOTFS_DIR}/etc/systemd/system
+cp /home/nymea/data-capture-server/LiveEyeDataCapture.service /etc/systemd/system
 sudo systemctl enable LiveEyeDataCapture.service
 EOF
 
