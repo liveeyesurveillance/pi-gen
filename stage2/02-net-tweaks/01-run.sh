@@ -42,3 +42,10 @@ fi
 on_chroot << EOF
 echo 'nymea:xxxx' | chpasswd
 EOF
+
+on_chroot << EOF
+# Disable dhcpcd service
+echo 'disable_dhcpcd=true' >> "/boot/cmdline.txt"
+# Enable NetworkManager service
+echo 'enable_NetworkManager=true' >> "/boot/cmdline.txt"
+EOF
