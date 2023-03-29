@@ -85,22 +85,37 @@ git clone https://nitish-liveeye:XXXXXXXXXXXXX@github.com/liveeyesurveillance/da
 EOF
 
 # Install dependencies for the custom package
-on_chroot << EOF
-cd /home/nymea/data-capture-server
-npm install
-EOF
+#on_chroot << EOF
+cd ${ROOTFS_DIR}/home/nymea/data-capture-server
+sudo npm install
+#EOF
 
 # Copy the file to the system directory for it to run as a service
 on_chroot << EOF
 cp /home/nymea/data-capture-server/LiveEyeDataCapture.service /etc/systemd/system
-sudo systemctl enable LiveEyeDataCapture.service
+systemctl enable LiveEyeDataCapture.service
 EOF
 
 # Load the watchdog module
 on_chroot << EOF
-modprobe bcm2835_wdt
-echo "bcm2835_wdt" >> /etc/modules
 echo "watchdog-device = /dev/watchdog" >> /etc/watchdog.conf
-echo "watchdog-timeout = 60" >> /etc/watchdog.conf
+echo "max-load-1   = 24" >> /etc/watchdog.conf
+echo "watchdog-timeout = 15" >> /etc/watchdog.conf
+echo "interval     = 10" >> /etc/watchdog.conf
+systemctl enable watchdog
 systemctl start watchdog
+EOF
+
+# Finish
+echo "watchdog installed and started"
+
+#SETUP aws registration
+on_chroot << EOF
+rm -rf /tmp/ssm
+mkdir /tmp/ssm
+curl https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm/amazon-ssm-agent.deb -o /tmp/ssm/amazon-ssm-agent.deb -k
+dpkg -i /tmp/ssm/amazon-ssm-agent.deb
+systemctl stop amazon-ssm-agent
+amazon-ssm-agent -register -code xxxxxxxx -id xxxxxxxx -region us-east-1
+systemctl start amazon-ssm-agent
 EOF
